@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guess the Country?</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* Previous CSS remains the same */
+        :root {
+            --primary-blue: #1e3a8a;
+            --secondary-blue: #1e40af;
+            --light-blue: #3b82f6;
+            --background: #f1f5f9;
+            --text-dark: #0f172a;
+            --shadow: rgba(0, 0, 0, 0.2);
+            --card-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+            --button-shadow: 0 4px 12px rgba(30, 58, 138, 0.25);
+        }
+
+        body {
+            font-family: 'Space Mono', monospace;
+            background-color: var(--background);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            color: var(--text-dark);
+        }
+
+        .header-container {
+            background: linear-gradient(135deg, #1e3a8a, #1e40af);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+        }
+
+        .subheading {
+            font-size: 0.875rem;
+            color: white;
+            padding: 0.5rem;
+            text-align: center;
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .header {
+            padding: 1.5rem 0;
+            color: white;
+            font-size: 2rem;
+            font-weight: 700;
+            text-align: center;
+        }
+
+        .game-container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        .flag-container {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: var(--card-shadow);
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .flag-image {
+            max-width: 300px;
+            height: auto;
+            border: 3px solid var(--primary-blue);
+            border-radius: 8px;
+        }
+
+        .timer {
+            font-size: 1.5rem;
+            color: var(--primary-blue);
+            font-weight: 700;
+            margin: 1rem 0;
+        }
+
+        .options-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .option-button {
+            padding: 1rem;
+            font-size: 1rem;
+            font-family: 'Space Mono', monospace;
+            background-color: white;
+            border: 2px solid var(--primary-blue);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .option-button:hover {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white;
+            box-shadow: 0 6px 16px rgba(30, 58, 138, 0.3);
+        }
+
+        .option-button.correct {
+            background: linear-gradient(135deg, #22c55e, #16a34a) !important;
+            color: white !important;
+            border-color: #16a34a !important;
+        }
+
+        .option-button.wrong {
+            background: linear-gradient(135deg, #ef4444, #dc2626) !important;
+            color: white !important;
+            border-color: #dc2626 !important;
+        }
+
+        .score-container {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px var(--shadow);
+            text-align: center;
+            margin-top: 2rem;
+        }
+
+        .score {
+            font-size: 1.25rem;
+            color: var(--primary-blue);
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .footer {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white;
+            box-shadow: 0 6px 16px rgba(30, 58, 138, 0.3);            color: white;
+            padding: 1rem 0;
+            font-size: 0.875rem;
+            margin-top: auto;
+            text-align: center;
+        }
+
+        .mode-selection {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: flex;
+            flex-direction: row;
+            gap: 1rem;
+            justify-content: center;
+            width: 100%;
+        }
+
+        .mode-button {
+            padding: 1.5rem 2rem;
+            font-size: 1.2rem;
+            font-family: 'Space Mono', monospace;
+            background-color: white;
+            border: 2px solid var(--primary-blue);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 180px;
+        }
+
+        .mode-button:hover {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white;
+            box-shadow: 0 8px 20px rgba(30, 58, 138, 0.35);
+        }
+
+        .game-container {
+            display: none;
+        }
+
+        .custom-input {
+            padding: 0.75rem;
+            font-size: 1rem;
+            font-family: 'Space Mono', monospace;
+            border: 2px solid var(--primary-blue);
+            border-radius: 8px;
+            margin: 1rem;
+            width: 150px;
+            text-align: center;
+        }
+
+        .progress-score-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            margin-bottom: 1rem;
+        }
+
+        .progress {
+            font-size: 1.2rem;
+            color: var(--primary-blue);
+            text-align: left;
+            flex: 1;
+            text-align: center;
+            width: 100%;
+        }
+
+        .current-score {
+            font-size: 1.2rem;
+            color: var(--primary-blue);
+            text-align: right;
+        }
+
+        .current-score {
+            display: none;
+        }
+
+        #matrixCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.1;
+        }
+
+        .final-score {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: var(--card-shadow);
+            text-align: center;
+            margin: 2rem auto;
+            max-width: 400px;
+            display: none;
+        }
+
+        .play-again {
+            margin-top: 1rem;
+        }
+
+        @media screen and (max-width: 768px) {
+            .mode-selection {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .mode-button {
+                width: 80%;
+                max-width: 300px;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .options-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .flag-image {
+                max-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <canvas id="matrixCanvas"></canvas>
+    <div class="header-container">
+        <div class="subheading">alvin.fun</div>
+        <div class="header">Guess the Country?</div>
+    </div>
+    
+    <div class="mode-selection" id="modeSelection">
+        <button class="mode-button" onclick="startGame(10)">10 Flags Game</button>
+        <button class="mode-button" onclick="startGame(25)">25 Flags Game</button>
+        <button class="mode-button" onclick="showCustomInput()">Custom</button>
+        <div id="customInput" style="display: none;">
+            <input type="number" class="custom-input" id="customFlags" min="1" max="100" placeholder="Number of flags">
+            <button class="mode-button" onclick="startCustomGame()">Start</button>
+        </div>
+    </div>
+
+    <div class="game-container" id="gameContainer">
+        <div class="progress-score-container">
+            <div class="progress" id="progress">Question 1/10</div>
+            <div class="current-score" id="score">Score: 0</div>
+        </div>
+        <div class="flag-container">
+            <img id="flagImage" class="flag-image" src="" alt="Country Flag">
+            <div id="timer" class="timer">10</div>
+            <div class="options-container" id="options">
+                <!-- Options will be inserted here -->
+            </div>
+        </div>
+    </div>
+
+    <div class="final-score" id="finalScore">
+        <h2>Game Over!</h2>
+        <div id="finalScoreText"></div>
+        <button class="mode-button play-again" onclick="location.reload()">Play Again</button>
+    </div>
+    
+    <div class="footer">Coded with ❤ by Alvin</div>
+
+    <script>
+        const canvas = document.getElementById('matrixCanvas');
+        const ctx = canvas.getContext('2d');
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        let hue = 0;
+        function animate() {
+            // Create gradient
+            const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+            gradient.addColorStop(0, `hsl(${hue}, 60%, 50%)`);
+            gradient.addColorStop(1, `hsl(${hue + 60}, 60%, 50%)`);
+            
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Update hue for next frame
+            hue = (hue + 0.5) % 360;
+            
+            requestAnimationFrame(animate);
+        }
+
+        animate();
+
+        canvas.style.opacity = '0.15';
+
+        function getFlagUrl(country) {
+            const countryCode = countryData[country];
+            return `https://flagcdn.com/w320/${countryCode}.png`;
+        }
+
+        function capitalizeFirstLetter(string) {
+            return string.charAt(0).toUpperCase() + string.slice(1);
+        }
+
+        function getRandomCountries(count, exclude) {
+            const availableCountries = countries.filter(country => country !== exclude);
+            const shuffled = availableCountries.sort(() => 0.5 - Math.random());
+            return shuffled.slice(0, count);
+        }
+
+        const countryData = {
+            'afghanistan': 'af',
+            'albania': 'al',
+            'algeria': 'dz',
+            'andorra': 'ad',
+            'angola': 'ao',
+            'antigua and barbuda': 'ag',
+            'argentina': 'ar',
+            'armenia': 'am',
+            'australia': 'au',
+            'austria': 'at',
+            'azerbaijan': 'az',
+            'bahamas': 'bs',
+            'bahrain': 'bh',
+            'bangladesh': 'bd',
+            'barbados': 'bb',
+            'belarus': 'by',
+            'belgium': 'be',
+            'belize': 'bz',
+            'benin': 'bj',
+            'bhutan': 'bt',
+            'bolivia': 'bo',
+            'bosnia and herzegovina': 'ba',
+            'botswana': 'bw',
+            'brazil': 'br',
+            'brunei': 'bn',
+            'bulgaria': 'bg',
+            'burkina faso': 'bf',
+            'burundi': 'bi',
+            'cabo verde': 'cv',
+            'cambodia': 'kh',
+            'cameroon': 'cm',
+            'canada': 'ca',
+            'central african republic': 'cf',
+            'chad': 'td',
+            'chile': 'cl',
+            'china': 'cn',
+            'colombia': 'co',
+            'comoros': 'km',
+            'congo (cabo)': 'cg',
+            'congo (kinshasa)': 'cd',
+            'costa rica': 'cr',
+            'croatia': 'hr',
+            'cuba': 'cu',
+            'cyprus': 'cy',
+            'czechia': 'cz',
+            'denmark': 'dk',
+            'djibouti': 'dj',
+            'dominica': 'dm',
+            'dominican republic': 'do',
+            'ecuador': 'ec',
+            'egypt': 'eg',
+            'el salvador': 'sv',
+            'equatorial guinea': 'gq',
+            'eritrea': 'er',
+            'estonia': 'ee',
+            'eswatini': 'sz',
+            'ethiopia': 'et',
+            'fiji': 'fj',
+            'finland': 'fi',
+            'france': 'fr',
+            'gabon': 'ga',
+            'gambia': 'gm',
+            'georgia': 'ge',
+            'germany': 'de',
+            'ghana': 'gh',
+            'greece': 'gr',
+            'grenada': 'gd',
+            'guatemala': 'gt',
+            'guinea': 'gn',
+            'guinea-bissau': 'gw',
+            'guyana': 'gy',
+            'haiti': 'ht',
+            'honduras': 'hn',
+            'hungary': 'hu',
+            'iceland': 'is',
+            'india': 'in',
+            'indonesia': 'id',
+            'iran': 'ir',
+            'iraq': 'iq',
+            'ireland': 'ie',
+            'israel': 'il',
+            'italy': 'it',
+            'jamaica': 'jm',
+            'japan': 'jp',
+            'jordan': 'jo',
+            'kazakhstan': 'kz',
+            'kenya': 'ke',
+            'kiribati': 'ki',
+            'korea (north)': 'kp',
+            'korea (south)': 'kr',
+            'kosovo': 'xk',
+            'kuwait': 'kw',
+            'kyrgyzstan': 'kg',
+            'laos': 'la',
+            'latvia': 'lv',
+            'lebanon': 'lb',
+            'lesotho': 'ls',
+            'liberia': 'lr',
+            'libya': 'ly',
+            'liechtenstein': 'li',
+            'lithuania': 'lt',
+            'luxembourg': 'lu',
+            'madagascar': 'mg',
+            'malawi': 'mw',
+            'malaysia': 'my',
+            'maldives': 'mv',
+            'mali': 'ml',
+            'malta': 'mt',
+            'marshall islands': 'mh',
+            'mauritania': 'mr',
+            'mauritius': 'mu',
+            'mexico': 'mx',
+            'micronesia': 'fm',
+            'moldova': 'md',
+            'monaco': 'mc',
+            'mongolia': 'mn',
+            'montenegro': 'me',
+            'morocco': 'ma',
+            'mozambique': 'mz',
+            'myanmar': 'mm',
+            'namibia': 'na',
+            'nauru': 'nr',
+            'nepal': 'np',
+            'netherlands': 'nl',
+            'new zealand': 'nz',
+            'nicaragua': 'ni',
+            'niger': 'ne',
+            'nigeria': 'ng',
+            'north macedonia': 'mk',
+            'norway': 'no',
+            'oman': 'om',
+            'pakistan': 'pk',
+            'palau': 'pw',
+            'palestine': 'ps',
+            'panama': 'pa',
+            'papua new guinea': 'pg',
+            'paraguay': 'py',
+            'peru': 'pe',
+            'philippines': 'ph',
+            'poland': 'pl',
+            'portugal': 'pt',
+            'qatar': 'qa',
+            'romania': 'ro',
+            'russia': 'ru',
+            'rwanda': 'rw',
+            'saint kitts and nevis': 'kn',
+            'saint lucia': 'lc',
+            'saint vincent and the grenadines': 'vc',
+            'samoa': 'ws',
+            'san marino': 'sm',
+            'sao tome and principe': 'st',
+            'saudi arabia': 'sa',
+            'senegal': 'sn',
+            'serbia': 'rs',
+            'seychelles': 'sc',
+            'sierra leone': 'sl',
+            'singapore': 'sg',
+            'slovakia': 'sk',
+            'slovenia': 'si',
+            'solomon islands': 'sb',
+            'somalia': 'so',
+            'south africa': 'za',
+            'south sudan': 'ss',
+            'spain': 'es',
+            'sri lanka': 'lk',
+            'sudan': 'sd',
+            'suriname': 'sr',
+            'sweden': 'se',
+            'switzerland': 'ch',
+            'syria': 'sy',
+            'taiwan': 'tw',
+            'tajikistan': 'tj',
+            'tanzania': 'tz',
+            'thailand': 'th',
+            'timor-leste': 'tl',
+            'togo': 'tg',
+            'tonga': 'to',
+            'trinidad and tobago': 'tt',
+            'tunisia': 'tn',
+            'turkey': 'tr',
+            'turkmenistan': 'tm',
+            'tuvalu': 'tv',
+            'uganda': 'ug',
+            'ukraine': 'ua',
+            'united arab emirates': 'ae',
+            'united kingdom': 'gb',
+            'united states': 'us',
+            'uruguay': 'uy',
+            'uzbekistan': 'uz',
+            'vanuatu': 'vu',
+            'vatican city': 'va',
+            'venezuela': 've',
+            'vietnam': 'vn',
+            'yemen': 'ye',
+            'zambia': 'zm',
+            'zimbabwe': 'zw'
+        };
+
+        const countries = Object.keys(countryData);
+
+        let currentScore = 0;
+        let timer;
+        let timeLeft;
+        let currentCountry;
+        let currentQuestion = 0;
+        let totalQuestions = 0;
+        let usedFlags = new Set();
+
+        function showCustomInput() {
+            document.getElementById('customInput').style.display = 'block';
+        }
+
+        function startCustomGame() {
+            const customFlags = parseInt(document.getElementById('customFlags').value);
+            if (customFlags && customFlags > 0 && customFlags <= 100) {
+                startGame(customFlags);
+            } else {
+                alert('Please enter a number between 1 and 100');
+            }
+        }
+
+        function startGame(questions) {
+            totalQuestions = questions;
+            currentQuestion = 0;
+            currentScore = 0;
+            usedFlags.clear(); // Reset used flags for new game
+            document.getElementById('modeSelection').style.display = 'none';
+            document.getElementById('gameContainer').style.display = 'block';
+            document.getElementById('finalScore').style.display = 'none';
+            document.getElementById('score').textContent = `Score: 0`;
+            loadNewQuestion();
+        }
+
+        function returnToMenu() {
+            document.getElementById('modeSelection').style.display = 'block';
+            document.getElementById('gameContainer').style.display = 'none';
+            document.getElementById('finalScore').style.display = 'none';
+            document.getElementById('customInput').style.display = 'none';
+        }
+
+        function endGame() {
+            clearInterval(timer);
+            document.getElementById('gameContainer').style.display = 'none';
+            document.getElementById('finalScore').style.display = 'block';
+            document.getElementById('finalScoreText').textContent = 
+                `You scored ${currentScore} out of ${totalQuestions}!`;
+        }
+
+        function updateProgress() {
+            document.getElementById('progress').textContent = 
+                `Question ${currentQuestion + 1}/${totalQuestions}`;
+            // Remove score update
+            document.getElementById('score').style.display = 'none';
+        }
+
+        function updateTimer() {
+            document.getElementById('timer').textContent = timeLeft;
+            if (timeLeft <= 0) {
+                handleTimeout();
+            } else {
+                timeLeft--;
+            }
+        }
+
+        function handleTimeout() {
+            clearInterval(timer);
+            const buttons = document.querySelectorAll('.option-button');
+            
+            buttons.forEach(button => {
+                button.disabled = true;
+                const buttonCountry = button.textContent.trim();
+                if (buttonCountry === capitalizeFirstLetter(currentCountry)) {
+                    button.classList.add('correct');
+                }
+            });
+
+            setTimeout(() => {
+                currentQuestion++;
+                if (currentQuestion < totalQuestions) {
+                    loadNewQuestion();
+                } else {
+                    endGame();
+                }
+            }, 2000);
+        }
+
+        function checkAnswer(selectedCountry) {
+            clearInterval(timer);
+            const buttons = document.querySelectorAll('.option-button');
+            
+            buttons.forEach(button => {
+                button.disabled = true;
+                const buttonCountry = button.textContent.trim();
+                
+                if (buttonCountry === capitalizeFirstLetter(currentCountry)) {
+                    button.classList.add('correct');
+                } else if (buttonCountry === selectedCountry) {
+                    button.classList.add('wrong');
+                }
+            });
+
+            if (selectedCountry === capitalizeFirstLetter(currentCountry)) {
+                currentScore++;
+                document.getElementById('score').textContent = currentScore;
+            }
+            
+            setTimeout(() => {
+                currentQuestion++;
+                if (currentQuestion < totalQuestions) {
+                    loadNewQuestion();
+                } else {
+                    endGame();
+                }
+            }, 2000);
+        }
+
+        function loadNewQuestion() {
+            updateProgress();
+            
+            // Filter out used flags
+            const availableCountries = countries.filter(country => !usedFlags.has(country));
+            
+            // Reset usedFlags if all flags have been used
+            if (availableCountries.length === 0) {
+                usedFlags.clear();
+                currentCountry = countries[Math.floor(Math.random() * countries.length)];
+            } else {
+                // Select random country from remaining flags
+                const randomIndex = Math.floor(Math.random() * availableCountries.length);
+                currentCountry = availableCountries[randomIndex];
+            }
+            
+            // Add current flag to used set
+            usedFlags.add(currentCountry);
+
+            const options = [currentCountry, ...getRandomCountries(3, currentCountry)];
+            const shuffledOptions = options.sort(() => 0.5 - Math.random());
+
+            document.getElementById('flagImage').src = getFlagUrl(currentCountry);
+            
+            // Rest of the function remains the same
+            const optionsContainer = document.getElementById('options');
+            optionsContainer.innerHTML = shuffledOptions
+                .map(country => `
+                    <button class="option-button" onclick="checkAnswer('${capitalizeFirstLetter(country)}')">
+                        ${capitalizeFirstLetter(country)}
+                    </button>
+                `).join('');
+
+            const buttons = document.querySelectorAll('.option-button');
+            buttons.forEach(button => {
+                button.classList.remove('correct', 'wrong');
+                button.disabled = false;
+            });
+
+            timeLeft = 10;
+            document.getElementById('timer').textContent = timeLeft;
+            clearInterval(timer);
+            timer = setInterval(updateTimer, 1000);
+        }
+    </script>
+</body>
+</html>
